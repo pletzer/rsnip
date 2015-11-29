@@ -23,18 +23,17 @@ class CsvTableFromHtml:
         for row in self.tables[index]:
             for col in row:
                 val = self.__filter(repr(col))
-                print val
                 res += val + ','
             res +='\n'
         return res
         
     def __filter(self, line):
-    	res = re.sub(r'\<td[^\>]*\>', '', line)
-    	res = re.sub(r'\<a[^\>]*\>', '', res)
-    	res = re.sub(r'\<\/a\>', '', res)
-    	res = re.sub(r'\<\/td\>', '', res)
-    	res = re.sub(r'\\n', '', res)
-    	return res
+    	newLine = line.decode('UTF-8')
+    	for s in r'\<td[^\>]*\>', r'\<a[^\>]*\>', r'\<\/a\>', \
+                 r'\<\/td\>', r'\\n':
+        	newLine = re.sub(s, '', newLine)
+        newLine.replace('\,\,', ',NA,')
+    	return newLine
             
         
 #############################################################################
@@ -42,8 +41,10 @@ def test():
     url = 'https://en.wikipedia.org/wiki/List_of_countries_by_intentional_homicide_rate'
     page = CsvTableFromHtml(url)
     page.findTables()
-    csvTable = page.convertToCSV(2)
-    print csvTable
+    for tableIndex in range(page.getNumberOfTables()):
+    	print 'tableIndex = ', tableIndex
+        csvTable = page.convertToCSV(tableIndex)
+    	print csvTable
     
 if __name__ == '__main__': test()
         
