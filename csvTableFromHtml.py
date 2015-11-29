@@ -30,9 +30,9 @@ class CsvTableFromHtml:
     def __filter(self, line):
     	newLine = line.decode('UTF-8')
     	for s in r'\<td[^\>]*\>', r'\<a[^\>]*\>', r'\<\/a\>', \
-                 r'\<\/td\>', r'\\n':
+                 r'\<\/td\>', r'\\n', r"u''", \
+                 r'\<th[^\>]*\>', r'\<\/th\>', r'\<br\>':
         	newLine = re.sub(s, '', newLine)
-        newLine.replace('\,\,', ',NA,')
     	return newLine
             
         
@@ -44,7 +44,8 @@ def test():
     for tableIndex in range(page.getNumberOfTables()):
     	print 'tableIndex = ', tableIndex
         csvTable = page.convertToCSV(tableIndex)
-    	print csvTable
+    	f = open('table{}.csv'.format(tableIndex), 'w')
+    	f.write(csvTable.encode('utf-8'))
     
 if __name__ == '__main__': test()
         
