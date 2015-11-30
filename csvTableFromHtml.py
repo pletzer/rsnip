@@ -33,6 +33,8 @@ class CsvTableFromHtml:
             for th in all_headers[startIndex:]:
                 header = th.get_text()
                 if header and header != "u''":
+                    # remove comma
+                    header = self.__removeComma(header)
                     # remove funny character
                     header = re.sub(r'^[^\w]+', '', header)
                     headers.append(self.__removeEmpty(self.__removeComma(header)))
@@ -63,9 +65,9 @@ class CsvTableFromHtml:
             print(self.__filter(line).encode('utf-8'), file=f)
             
     def __filter(self, line):
-        # replace two consecutive commas with ,NA,
         newLine = line[:]
-        #newLine = re.sub(r'\,\s*\,', ',NA,', line)
+        # replace two consecutive commas with ,NA,
+        newLine = re.sub(r'\,\s*\,', ',NA,', line)
         # remove trailing comma
         newLine = re.sub(r'\,\s*$', '', newLine)
         # remove reference
@@ -85,6 +87,7 @@ class CsvTableFromHtml:
         
     def __removeEmpty(self, line):
         return re.sub(r"u''", "", line)
+
         
 #############################################################################
 def getHomicideData():
@@ -104,7 +107,7 @@ def getGunData():
         page.saveTableToCSV(ti)
     
 if __name__ == '__main__': 
-    #getHomicideData()
+    getHomicideData()
     getGunData()
         
     
