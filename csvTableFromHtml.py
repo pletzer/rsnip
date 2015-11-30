@@ -33,11 +33,13 @@ class CsvTableFromHtml:
             for th in all_headers[startIndex:]:
                 header = th.get_text()
                 if header and header != "u''":
+                    # remove funny character
+                    header = re.sub(r'^[^\w]+', '', header)
                     headers.append(self.__removeEmpty(self.__removeComma(header)))
             dataset.append(headers)
             # get the data 
             for row in table.find_all("tr")[startIndex:]:
-                datarow = [td.get_text() for td in row.find_all("td")]
+                datarow = [re.sub(r'\,', '', td.get_text()) for td in row.find_all("td")]
                 if datarow:
             	    dataset.append(datarow)
             self.tables.append(dataset)
@@ -68,6 +70,8 @@ class CsvTableFromHtml:
         newLine = re.sub(r'\,\s*$', '', newLine)
         # remove reference
         newLine = re.sub(r'\[\d+\]', '', newLine)
+        # remove funny leading characters
+        newLine = re.sub(r'^[^\w]+', '', newLine)
         return newLine
         
     def __removeComma(self, line):
@@ -95,12 +99,12 @@ def getGunData():
     url = 'https://en.wikipedia.org/wiki/Number_of_guns_per_capita_by_country'
     page = CsvTableFromHtml(url)
     page.findTables()
-    #page.printTable(2)
+    #page.printTable(0)
     for ti in range(page.getNumberOfTables()):
         page.saveTableToCSV(ti)
     
 if __name__ == '__main__': 
-    getHomicideData()
+    #getHomicideData()
     getGunData()
         
     
