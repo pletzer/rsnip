@@ -17,26 +17,26 @@ class CsvTableFromHtml:
         tables = self.soup.find_all('table', attrs={"class": className})
         for index in range(len(tables)):
             table = tables[index]
-            all_headers = table.find_all("th")
             dataset = []
-            dataName = self.__removeSpaces( \
-                         self.__removeComma( \
-                           self.__removeDot(all_headers[0].get_text()) \
-                                           ) \
-                                          )
-            if dataName:
-                self.tableNames.append(dataName)
+            startIndex = 0
+            tableField = table.find('th', attrs={'colspan': re.compile(r'\d+')})
+            if tableField:
+                tableName = tableField.get_text()
+                tableName = self.__removeSpaces(self.__removeComma(self.__removeDot(tableName)))
+                self.tableNames.append(tableName)
+                startIndex = 1
             else:
                 self.tableNames.append('table{}'.format(index))
             # get column headers
             headers = []
-            for th in all_headers[1:]:
+            all_headers = table.find_all("th")
+            for th in all_headers[startIndex:]:
                 header = th.get_text()
                 if header and header != "u''":
                     headers.append(self.__removeEmpty(self.__removeComma(header)))
             dataset.append(headers)
             # get the data 
-            for row in table.find_all("tr")[1:]:
+            for row in table.find_all("tr")[startIndex:]:
                 datarow = [td.get_text() for td in row.find_all("td")]
                 if datarow:
             	    dataset.append(datarow)
@@ -66,6 +66,8 @@ class CsvTableFromHtml:
         #newLine = re.sub(r'\,\s*\,', ',NA,', line)
         # remove trailing comma
         newLine = re.sub(r'\,\s*$', '', newLine)
+        # remove reference
+        newLine = re.sub(r'\[\d+\]', '', newLine)
         return newLine
         
     def __removeComma(self, line):
@@ -81,14 +83,24 @@ class CsvTableFromHtml:
         return re.sub(r"u''", "", line)
         
 #############################################################################
-def test():
+def getHomicideData():
     url = 'https://en.wikipedia.org/wiki/List_of_countries_by_intentional_homicide_rate'
     page = CsvTableFromHtml(url)
     page.findTables()
     #page.printTable(2)
     for ti in range(page.getNumberOfTables()):
-        page.saveTableToCSV(2)
+        page.saveTableToCSV(ti)
+        
+def getGunData():
+    url = 'https://en.wikipedia.org/wiki/Number_of_guns_per_capita_by_country'
+    page = CsvTableFromHtml(url)
+    page.findTables()
+    #page.printTable(2)
+    for ti in range(page.getNumberOfTables()):
+        page.saveTableToCSV(ti)
     
-if __name__ == '__main__': test()
+if __name__ == '__main__': 
+    getHomicideData()
+    getGunData()
         
     
